@@ -1,9 +1,19 @@
 from app.models.user import User
+
 from app.models.salon import Salon
+
 from app.models.service import Service
+
+from app.models.service_category import ServiceCategory
+
 from app.models.appointment import Appointment
+
 from app.models.booking import Booking
+
 from app.models.otp import EmailOTP
+
 from app.models.working_hours import SalonWorkingHours
+
 from app.models.staff_leave import StaffLeave
+
 from app.models.review import Review

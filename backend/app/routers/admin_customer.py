@@ -10,6 +10,7 @@ from app.schemas.admin_customer import (
 )
 from app.services.admin_customer import (
     deactivate_customer,
+    delete_customer,
     get_all_customers,
     get_customer,
     update_customer,
@@ -158,6 +159,45 @@ def deactivate_customer_endpoint(
 
     try:
         return deactivate_customer(
+            db=db,
+            customer=customer,
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error),
+        ) from error
+
+
+# =========================================================
+# Delete Customer
+# =========================================================
+
+@router.delete(
+    "/{customer_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_customer_endpoint(
+    customer_id: int,
+    current_user: User = Depends(
+        require_roles("admin")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_customer(
+        db=db,
+        customer_id=customer_id,
+    )
+
+    if customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found",
+        )
+
+    try:
+        delete_customer(
             db=db,
             customer=customer,
         )

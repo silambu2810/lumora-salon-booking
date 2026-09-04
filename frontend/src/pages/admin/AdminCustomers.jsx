@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8000";
 
 function getToken() {
   return localStorage.getItem("lumora_token");
@@ -202,6 +204,74 @@ function AdminCustomers() {
         getErrorMessage(
           err,
           "Unable to deactivate customer."
+        )
+      );
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  // =========================================================
+  // DELETE CUSTOMER
+  // =========================================================
+
+  async function handleDelete(customerId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this customer? This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const token = getToken();
+
+    if (!token) {
+      handleLogout();
+      return;
+    }
+
+    try {
+      setActionLoading(customerId);
+      setMessage("");
+      setError("");
+
+      await axios.delete(
+        `${API_URL}/admin/customers/${customerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Remove the deleted customer from the UI.
+      setCustomers((currentCustomers) =>
+        currentCustomers.filter(
+          (customer) =>
+            Number(customer.id) !==
+            Number(customerId)
+        )
+      );
+
+      setMessage(
+        "Customer deleted permanently."
+      );
+    } catch (err) {
+      console.error(
+        "DELETE CUSTOMER ERROR:",
+        err
+      );
+
+      if (err.response?.status === 401) {
+        handleLogout();
+        return;
+      }
+
+      setError(
+        getErrorMessage(
+          err,
+          "Unable to delete customer."
         )
       );
     } finally {
@@ -550,7 +620,7 @@ function AdminCustomers() {
 
 
                   {/* =========================================
-                      ACTION
+                      ACTIVE CUSTOMER ACTION
                       ========================================= */}
 
                   {isActive && (
@@ -574,10 +644,40 @@ function AdminCustomers() {
                     </button>
                   )}
 
+
+                  {/* =========================================
+                      INACTIVE CUSTOMER ACTIONS
+                      ========================================= */}
+
                   {!isActive && (
-                    <div className="inactive-note">
-                      This customer account is
-                      currently inactive.
+                    <div className="customer-delete-area">
+
+                      <div className="inactive-note">
+                        This customer account is
+                        currently inactive.
+                      </div>
+
+                      {!customer.is_email_verified && (
+                        <button
+                          type="button"
+                          className="danger-button"
+                          onClick={() =>
+                            handleDelete(
+                              customer.id
+                            )
+                          }
+                          disabled={
+                            actionLoading ===
+                            customer.id
+                          }
+                        >
+                          {actionLoading ===
+                          customer.id
+                            ? "Deleting..."
+                            : "Delete customer"}
+                        </button>
+                      )}
+
                     </div>
                   )}
 
