@@ -95,15 +95,14 @@ def register_user(
         )
 
     except Exception as error:
-        # If OTP email delivery fails, remove the newly
-        # created account so the customer isn't left with
-        # an account they cannot verify.
-        db.delete(user)
-        db.commit()
-
+        # Keep the newly created account.
+        #
+        # create_and_send_otp() already invalidates the OTP
+        # when email delivery fails. The user can therefore
+        # remain unverified and request a new OTP later.
         raise ValueError(
             "Registration succeeded, but we could not send "
-            "the verification email. Please try again."
+            "the verification email. Please try again later."
         ) from error
 
     return user
