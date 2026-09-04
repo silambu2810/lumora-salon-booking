@@ -62,6 +62,9 @@ app.add_middleware(
         # Expo Web
         "http://localhost:8081",
         "http://127.0.0.1:8081",
+
+        # Production frontend
+        "https://lumora-salon-booking-1.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
