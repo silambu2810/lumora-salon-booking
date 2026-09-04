@@ -97,6 +97,7 @@ function OwnerDashboard() {
   const [user, setUser] = useState(null);
   const [salon, setSalon] = useState(null);
   const [services, setServices] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [staff, setStaff] = useState([]);
 
   const [workingHours, setWorkingHours] = useState([]);
@@ -288,6 +289,7 @@ function OwnerDashboard() {
     const [
       salonResponse,
       servicesResponse,
+      categoriesResponse,
       staffResponse,
     ] = await Promise.all([
       axios.get(
@@ -301,6 +303,11 @@ function OwnerDashboard() {
       ),
 
       axios.get(
+        `${API_URL}/service-categories/?salon_id=${salonId}`,
+        { headers }
+      ),
+
+      axios.get(
         `${API_URL}/salons/${salonId}/staff`,
         { headers }
       ),
@@ -308,6 +315,7 @@ function OwnerDashboard() {
 
     setSalon(salonResponse.data);
     setServices(servicesResponse.data || []);
+    setCategories(categoriesResponse.data || []);
     setStaff(staffResponse.data || []);
   }
 
@@ -1262,18 +1270,28 @@ function OwnerDashboard() {
 
 
                 <label>
-                  Category ID
+                  Category
 
-                  <input
-                    type="number"
+                  <select
                     name="category_id"
                     value={
                       serviceForm.category_id
                     }
                     onChange={handleServiceChange}
-                    placeholder="Optional"
-                    min="1"
-                  />
+                  >
+                    <option value="">
+                      Select category (optional)
+                    </option>
+
+                    {categories.map((category) => (
+                      <option
+                        key={category.id}
+                        value={category.id}
+                      >
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
 
