@@ -34,3 +34,6 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+backend/gmail_credentials.json
+backend/gmail_token.json

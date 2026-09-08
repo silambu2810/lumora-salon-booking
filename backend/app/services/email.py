@@ -1,27 +1,27 @@
-import smtplib
+import base64
 from email.message import EmailMessage
 
-from app.core.config import settings
+from googleapiclient.discovery import build
+
+from app.services.gmail_auth import get_gmail_credentials
 
 
 def send_otp_email(
     recipient_email: str,
     otp: str,
 ) -> None:
+    credentials = get_gmail_credentials()
 
-    if not settings.SMTP_USERNAME or not settings.SMTP_PASSWORD:
-        raise RuntimeError(
-            "SMTP email configuration is missing"
-        )
+    service = build(
+        "gmail",
+        "v1",
+        credentials=credentials,
+    )
 
     message = EmailMessage()
 
-    message["Subject"] = "Lumora Email Verification OTP"
-    message["From"] = (
-        f"{settings.SMTP_FROM_NAME} "
-        f"<{settings.SMTP_FROM_EMAIL or settings.SMTP_USERNAME}>"
-    )
     message["To"] = recipient_email
+    message["Subject"] = "Lumora Email Verification OTP"
 
     message.set_content(
         f"""
@@ -37,19 +37,19 @@ If you did not create a Lumora account, you can safely ignore this email.
 
 Regards,
 Lumora Team
-""".strip()
+"""
     )
 
-    with smtplib.SMTP(
-        settings.SMTP_HOST,
-        settings.SMTP_PORT,
-    ) as server:
+    encoded_message = base64.urlsafe_b64encode(
+        message.as_bytes()
+    ).decode()
 
-        server.starttls()
-
-        server.login(
-            settings.SMTP_USERNAME,
-            settings.SMTP_PASSWORD,
-        )
-
-        server.send_message(message)
+    try:
+        service.users().messages().send(
+            userId="me",
+            body={"raw": encoded_message},
+        ).execute()
+    except Exception as error:
+        raise RuntimeError(
+            "Unable to send verification email"
+        ) from error
