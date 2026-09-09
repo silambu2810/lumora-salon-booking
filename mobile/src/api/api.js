@@ -3,10 +3,10 @@
 // =========================================================
 
 // Expo Web / Chrome on this computer
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://lumora-salon-booking.onrender.com";
 
 // Android Emulator:
-// const API_URL = "http://10.0.2.2:8000";
+// const API_URL = "http://10.0.2.2:8000n";
 
 // Physical Android phone:
 // const API_URL = "http://YOUR_PC_IP:8000";
